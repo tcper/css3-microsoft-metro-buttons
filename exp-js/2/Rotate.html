@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Rotate</title>
+    <!-- Bootstrap -->
+    <link href="../../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../../css/bootstrap-responsive.min.css" rel="stylesheet">
+    <link href="../../css/styles.css" rel="stylesheet">
+    <link href="../../css/m-styles.min.css" rel="stylesheet"> 
+    
+  </head>
+  <body>
+    <div class="container">
+      <div class="row"></div>
+      <div class="span12">
+        <section>       
+          <div class="page-header"><h2>Rotate</h2></div>
+        </section>
+
+        <section>
+          
+
+          <div>
+            <canvas id="canvas3d" width="500" height="500"></canvas>
+          </div>
+
+        </section>
+
+      </div>
+    </div>
+    <script src="../../js/jquery-1.8.0.min.js"></script>
+    <script src="../../js/bootstrap.min.js"></script>
+    <script src="../../js/m-radio.min.js"></script>
+
+    <script type="text/javascript">
+      var canvas = document.getElementById("canvas3d");
+      var context = canvas.getContext("2d");
+      var width = canvas.width, height = canvas.height, vanishingPoint = {x: width / 2, y: height / 2};
+      var focalLength = 250, numBalls = 50;
+      var ballList = [];
+      var offsetTop = canvas.offsetTop, offsetLeft = canvas.offsetLeft;
+      var mousePoint = {x: 0, y: 0};
+
+      function createBalls(){
+          var ball;
+          for(var i = 0; i < numBalls; i += 1){
+              ball = new Ball();
+              ball.init();
+              ballList.push(ball);
+          }
+      }
+
+      function loop(){
+          var ball;
+          for(var i = 0; i < numBalls; i += 1){
+              ball = ballList[i];
+              ball.update((mousePoint.x - vanishingPoint.x) * 0.0005, (mousePoint.y - vanishingPoint.y) * 0.0005);
+          }
+          ballList.sort(zSort);
+          draw();
+      }
+
+      function zSort(a, b){
+          var posZ1 = a["posZ"];
+          var posZ2 = b["posZ"];
+          if(posZ1 < posZ2){
+              return 1;
+          }else if(posZ1 > posZ2){
+              return -1;
+          }else{
+              return 0;
+          }
+      }
+
+      function draw(){
+          var ball;
+          context.fillStyle = "rgb(0, 0, 0)";
+          context.clearRect(0, 0, width, height);
+          for(var i = 0; i < numBalls; i += 1){
+              ball = ballList[i];
+              context.fillStyle = ball.color;
+              context.beginPath();
+              context.arc(vanishingPoint.x + ball.posX * ball.scale, vanishingPoint.y + ball.posY * ball.scale, 15 * ball.scale, 0, Math.PI * 2, false);
+              context.fill();
+          }
+      }
+
+      this.addEventListener("mousemove", function(event){
+          mousePoint.x = event.clientX - offsetLeft;
+          mousePoint.y = event.clientY - offsetTop;
+          console.log(mousePoint.x);
+      });
+
+      function Ball(){
+          this.posX;
+          this.posY;
+          this.posZ;
+          this.angleX;
+          this.angleY;
+          this.color;
+          this.scale;
+      }
+
+      Ball.prototype = {
+
+          init : function(){
+              this.posX = Math.random() * 200 - 100;
+              this.posY = Math.random() * 200 - 100;
+              this.posZ = Math.random() * 200 - 100;
+              this.color = this.randomColor();
+          },
+
+          randomColor : function(){
+              var r = Math.floor(Math.random() * 255);
+              var g = Math.floor(Math.random() * 255);
+              var b = Math.floor(Math.random() * 255);
+              return "rgb(" + r + "," + g + "," + b + ")";
+          },
+
+          update : function(angleX, angleY){
+              this.angleX = angleY;
+              this.angleY = angleX;
+              this.rotateX();
+              this.rotateY();
+              this.scale = focalLength / (focalLength + this.posZ);
+          },
+
+          rotateX : function(){
+              var cosX = Math.cos(this.angleX);
+              var sinX = Math.sin(this.angleX);
+
+              var y1 = this.posY * cosX - this.posZ * sinX;
+              var z1 = this.posZ * cosX + this.posY * sinX;
+
+              this.posY = y1;
+              this.posZ = z1;
+          },
+
+          rotateY : function(){
+              var cosY = Math.cos(this.angleY);
+              var sinY = Math.sin(this.angleY);
+
+              var x1 = this.posX * cosY - this.posZ * sinY;
+              var z1 = this.posZ * cosY + this.posX * sinY;
+
+              this.posX = x1;
+              this.posZ = z1;
+          }
+      }
+
+      createBalls();
+      setInterval(loop, 1000/60);
+
+    </script>
+  </body>
+</html>
