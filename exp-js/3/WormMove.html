@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>WormMove</title>
+    <!-- Bootstrap -->
+    <link href="../../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../../css/bootstrap-responsive.min.css" rel="stylesheet">
+    <link href="../../css/styles.css" rel="stylesheet">
+    <link href="../../css/m-styles.min.css" rel="stylesheet"> 
+  </head>
+  <body>
+    <div class="container">
+      <div class="row"></div>
+      <div class="span12">
+        <section>       
+          <div class="page-header"><h2>WormMove</h2></div>
+        </section>
+        <section>
+          <div>
+		<canvas id='c' width="465" height="465"></canvas>
+          </div>
+
+        </section>
+
+      </div>
+    </div>
+    <script src="../../js/jquery-1.8.0.min.js"></script>
+    <script src="../../js/bootstrap.min.js"></script>
+    <script src="../../js/m-radio.min.js"></script>
+    <script type="text/javascript">
+    // forked from Evan's "ブラウン運動 (Brownian Motion)" http://jsdo.it/Evan/incV
+    var looper;
+    var SCREEN_WIDTH = 465;
+    var SCREEN_HEIGHT = 465;
+    var canvas = document.getElementById('c');
+    var context = canvas.getContext('2d');
+
+    var dots;
+    var NUM_DOTS = 100;
+    var damp = 0.95;
+
+    brownian_init();
+
+    function brownian_init() {
+        createDots();
+      looper = setInterval(brownian_loop, 1000/31);
+    }
+
+    function createDots() {
+      dots = [];
+      for (var i=0; i<NUM_DOTS; i++) {
+        var dot = {
+          x: SCREEN_WIDTH/2,
+          y: SCREEN_HEIGHT/2,
+          vx: Math.random()-0.5,
+          vy: Math.random()-0.5,
+          update: function() {
+            this.vx += Math.random()-0.5;
+            this.vy += Math.random()-0.5;
+            this.x += this.vx;
+            this.y += this.vy;
+            this.vx *= damp;
+            this.vy *= damp;
+            if (this.x > SCREEN_WIDTH) {
+              this.x = 0;
+            } else if (this.x < 0) {
+              this.x = SCREEN_WIDTH;
+            }
+            if (this.y > SCREEN_HEIGHT) {
+              this.y = 0;
+            } else if (this.y < 0) {
+              this.y = SCREEN_HEIGHT;
+            }
+          },
+          draw: function() {
+            context.fillRect(this.x-0.5, this.y-0.5, 1, 1);
+          }
+        };
+        dots.push(dot);
+      }
+    }
+
+    function brownian_loop() {
+      context.fillStyle = "rgba(238,238,238, 0.05)";
+      context.fillRect(0,0,canvas.width, canvas.height);
+      context.fillStyle = "rgb(60,60,60)";
+      for (var i=0; i<NUM_DOTS; i++) {
+        dots[i].update();
+        dots[i].draw();
+      }
+    }
+    </script>
+  </body>
+</html>
